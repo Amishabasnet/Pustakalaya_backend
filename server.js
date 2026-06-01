@@ -6,9 +6,12 @@ const rateLimit = require("express-rate-limit");
 
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
+const bookRoutes = require("./routes/bookRoutes");
+const wishlistRoutes = require("./routes/wishlistRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 const errorHandler = require("./middleware/errorHandler");
 
-// Connect to MongoDB 
+//  Connect to MongoDB 
 connectDB();
 
 const app = express();
@@ -25,7 +28,7 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Core Middleware 
+//  Core Middleware 
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:3000",
@@ -38,12 +41,14 @@ app.use(express.json({ limit: "10kb" }));       // Parse JSON body (size-limited
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());                         // Parse cookies
 
+//  Health Check 
 app.get("/", (req, res) => {
-  res.json({ success: true, message: "Auth API is running" });
+  res.json({ success: true, message: "Auth API is running 🚀" });
 });
 
-// Routes
+//  Routes 
 app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/books", bookRoutes);
 
 //  404 Handler 
 app.use((req, res) => {
@@ -56,5 +61,5 @@ app.use(errorHandler);
 //  Start Server 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
+  console.log(` Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);
 });
