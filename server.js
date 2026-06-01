@@ -8,7 +8,8 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const bookRoutes = require("./routes/bookRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
-const cartRoutes = require("./routes/cartRoutes");
+const cartRoutes = require('./routes/cartRoutes');
+const checkoutRoutes = require('./routes/checkoutRoutes');
 const errorHandler = require("./middleware/errorHandler");
 
 //  Connect to MongoDB 
@@ -51,7 +52,7 @@ app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/cart", cartRoutes);
-
+app.use("/api/checkout", checkoutRoutes);
 
 //  404 Handler 
 app.use((req, res) => {
