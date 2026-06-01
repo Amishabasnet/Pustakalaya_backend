@@ -49,6 +49,9 @@ app.get("/", (req, res) => {
 //  Routes 
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/books", bookRoutes);
+app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/cart", cartRoutes);
+
 
 //  404 Handler 
 app.use((req, res) => {
