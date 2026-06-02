@@ -2,23 +2,11 @@ const mongoose = require("mongoose");
 
 const wishlistSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      unique: true, // one wishlist per user
-    },
+    user:  { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
     books: [
       {
-        book: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Book",
-          required: true,
-        },
-        addedAt: {
-          type: Date,
-          default: Date.now,
-        },
+        book:    { type: mongoose.Schema.Types.ObjectId, ref: "Book", required: true },
+        addedAt: { type: Date, default: Date.now },
       },
     ],
   },

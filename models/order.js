@@ -1,77 +1,43 @@
 const mongoose = require("mongoose");
+const { ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHODS } = require("../types");
 
 const orderItemSchema = new mongoose.Schema({
-  book: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Book",
-    required: true,
-  },
-  title: String,       // snapshot at order time
-  author: String,
+  book:       { type: mongoose.Schema.Types.ObjectId, ref: "Book", required: true },
+  title:      String,
+  author:     String,
   coverImage: String,
-  quantity: { type: Number, required: true, min: 1 },
-  price: { type: Number, required: true },  // price per unit at purchase
+  quantity:   { type: Number, required: true, min: 1 },
+  price:      { type: Number, required: true },
 });
 
 const orderSchema = new mongoose.Schema(
   {
-    orderId: {
-      type: String,
-      unique: true,
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    items: [orderItemSchema],
+    orderId: { type: String, unique: true },
+    user:    { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    items:   [orderItemSchema],
 
-    //  Delivery 
     deliveryAddress: {
-      fullName:  { type: String, required: true },
-      phone:     { type: String, required: true },
-      street:    { type: String, required: true },
-      city:      { type: String, required: true },
-      province:  { type: String, default: "" },
+      fullName: { type: String, required: true },
+      phone:    { type: String, required: true },
+      street:   { type: String, required: true },
+      city:     { type: String, required: true },
+      province: { type: String, default: "" },
     },
-    deliveryOption: {
-      type: String,
-      enum: ["standard", "express"],
-      default: "standard",
-    },
-    deliveryCharge: {
-      type: Number,
-      required: true,
-    },
-    estimatedDelivery: {
-      type: String,   // e.g. "2–4 days" or "1 day"
-    },
+    deliveryOption:    { type: String, enum: ["standard", "express"], default: "standard" },
+    deliveryCharge:    { type: Number, required: true },
+    estimatedDelivery: { type: String },
 
-    //  Payment 
-    paymentMethod: {
-      type: String,
-      enum: ["esewa", "khalti", "card", "cod"],
-      required: true,
-    },
-    paymentStatus: {
-      type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending",
-    },
-    paymentTransactionId: {
-      type: String,
-      default: null,
-    },
+    paymentMethod:        { type: String, enum: PAYMENT_METHODS, required: true },
+    paymentStatus:        { type: String, enum: Object.values(PAYMENT_STATUS), default: PAYMENT_STATUS.PENDING },
+    paymentTransactionId: { type: String, default: null },
 
-    //  Pricing 
-    subtotal:   { type: Number, required: true },
-    total:      { type: Number, required: true },
+    subtotal: { type: Number, required: true },
+    total:    { type: Number, required: true },
 
-    //  Order Lifecycle 
     status: {
       type: String,
-      enum: ["placed", "confirmed", "processing", "shipped", "delivered", "cancelled"],
-      default: "placed",
+      enum: Object.values(ORDER_STATUS),
+      default: ORDER_STATUS.PLACED,
     },
     statusHistory: [
       {
@@ -80,18 +46,16 @@ const orderSchema = new mongoose.Schema(
         changedAt: { type: Date, default: Date.now },
       },
     ],
-
-    cancelledAt: { type: Date, default: null },
+    cancelledAt:  { type: Date, default: null },
     cancelReason: { type: String, default: null },
   },
   { timestamps: true }
 );
 
-//  Auto-generate readable Order ID (e.g. #FS-11111) 
 orderSchema.pre("save", async function (next) {
   if (!this.orderId) {
     const count = await this.constructor.countDocuments();
-    this.orderId = `FS-${String(10000 + count + 1)}`;
+    this.orderId = `FS-${10000 + count + 1}`;
   }
   next();
 });
