@@ -1,10 +1,10 @@
-const authService           = require("../services/auth.service");
-const { SignUpDTO, SignInDTO } = require("../dtos/auth.dto");
-const jwt                   = require("jsonwebtoken");
-const config                = require("../config/env");
+const authService             = require("../services/auth.service");
+const { SignUpDTO, SignInDTO, UpdateProfileDTO } = require("../dtos/auth.dto");
+const jwt                     = require("jsonwebtoken");
+const config                  = require("../config/env");
 const { generateAccessToken, generateRefreshToken } = require("../config/jwt");
-const userRepo              = require("../repositories/user.repository");
-const { Unauthorized }      = require("../errors/httpErrors");
+const userRepo                = require("../repositories/user.repository");
+const { Unauthorized }        = require("../errors/httpErrors");
 
 class AuthController {
   async signUp(req, res, next) {
@@ -56,6 +56,21 @@ class AuthController {
     try {
       const user = await authService.getMe(req.user._id);
       res.status(200).json({ success: true, data: { user } });
+    } catch (err) { next(err); }
+  }
+
+  async updateProfile(req, res, next) {
+    try {
+      const dto  = new UpdateProfileDTO(req.body);
+      const user = await authService.updateProfile(req.user._id, dto);
+      res.status(200).json({ success: true, message: "Profile updated successfully.", data: { user } });
+    } catch (err) { next(err); }
+  }
+
+  async getProfileStats(req, res, next) {
+    try {
+      const stats = await authService.getProfileStats(req.user._id);
+      res.status(200).json({ success: true, data: stats });
     } catch (err) { next(err); }
   }
 }
