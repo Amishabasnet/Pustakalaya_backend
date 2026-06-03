@@ -3,8 +3,12 @@ const cartRepo                   = require("../repositories/cart.repository");
 const bookRepo                   = require("../repositories/book.repository");
 const config                     = require("../config/env");
 const { BadRequest, NotFound }   = require("../errors/httpErrors");
-const { ORDER_STATUS, CANCELLABLE_STATUSES, PAYMENT_STATUS } = require("../types");
+const { ORDER_STATUS, CANCELLABLE_STATUSES, PAYMENT_STATUS } = require("../types/constants");
 const { OrderResponseDTO, OrderConfirmationDTO } = require("../dtos/order.dto");
+
+// UI "Processing" tab maps to these statuses
+const PROCESSING_STATUSES = [ORDER_STATUS.PLACED, ORDER_STATUS.CONFIRMED, ORDER_STATUS.PROCESSING, ORDER_STATUS.SHIPPED];
+const DELIVERED_STATUSES  = [ORDER_STATUS.DELIVERED];
 
 class OrderService {
   async getCheckoutSummary(userId) {
@@ -37,7 +41,6 @@ class OrderService {
     const cart = await cartRepo.findByUser(userId);
     if (!cart || cart.items.length === 0) throw BadRequest("Your cart is empty.");
 
-    // Validate stock and snapshot items
     const orderItems = [];
     for (const item of cart.items) {
       const book = await bookRepo.findById(item.book._id || item.book);
@@ -61,7 +64,6 @@ class OrderService {
       statusHistory: [{ status: ORDER_STATUS.PLACED, note: "Order placed by customer." }],
     });
 
-    // Decrement stock + clear cart
     await Promise.all([
       ...orderItems.map((i) => bookRepo.decrementStock(i.book, i.quantity)),
       cartRepo.clear(userId),
@@ -70,13 +72,23 @@ class OrderService {
     return new OrderConfirmationDTO(order);
   }
 
-  async getOrders(userId, { page = 1, limit = 10 }) {
-    const skip  = (Number(page) - 1) * Number(limit);
+  async getOrders(userId, { page = 1, limit = 10, statusFilter }) {
+    const skip = (Number(page) - 1) * Number(limit);
+
+    // Map UI tab names to DB status arrays
+    let statusQuery = null;
+    if (statusFilter === "processing") statusQuery = PROCESSING_STATUSES;
+    else if (statusFilter === "delivered") statusQuery = DELIVERED_STATUSES;
+
     const [orders, total] = await Promise.all([
-      orderRepo.findAllByUser(userId, { skip, limit: Number(limit) }),
-      orderRepo.countByUser(userId),
+      orderRepo.findAllByUser(userId, { skip, limit: Number(limit), statusQuery }),
+      orderRepo.countByUser(userId, statusQuery),
     ]);
-    return { orders, pagination: { total, page: Number(page), totalPages: Math.ceil(total / Number(limit)) } };
+
+    return {
+      orders,
+      pagination: { total, page: Number(page), totalPages: Math.ceil(total / Number(limit)) },
+    };
   }
 
   async getOrder(orderId, userId) {
@@ -91,7 +103,6 @@ class OrderService {
     if (!CANCELLABLE_STATUSES.includes(order.status))
       throw BadRequest(`Order cannot be cancelled at status: "${order.status}".`);
 
-    // Restore stock
     await Promise.all(order.items.map((i) => bookRepo.incrementStock(i.book, i.quantity)));
 
     order.status       = ORDER_STATUS.CANCELLED;

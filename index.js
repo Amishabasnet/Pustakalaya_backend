@@ -14,7 +14,7 @@ const wishlistRoutes = require("./routes/wishlist.routes");
 const orderRoutes    = require("./routes/order.routes");
 const searchRoutes   = require("./routes/search.routes");
 const referralRoutes = require("./routes/referral.routes");
-
+const supportRoutes  = require("./routes/support.routes");
 
 //  Connect Database 
 connectDB();
@@ -45,6 +45,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/checkout", orderRoutes);
 app.use("/api/search",   searchRoutes);
 app.use("/api/referral", referralRoutes);
+app.use("/api/support",  supportRoutes);
 
 
 //  404 Handler 

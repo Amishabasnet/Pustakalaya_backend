@@ -4,8 +4,10 @@ const bcrypt   = require("bcryptjs");
 const userSchema = new mongoose.Schema(
   {
     fullName:    { type: String, required: true, trim: true },
+    username:    { type: String, unique: true, sparse: true, trim: true, lowercase: true },
     phoneNumber: { type: String, required: true, trim: true },
     email:       { type: String, required: true, unique: true, lowercase: true, trim: true },
+    address:     { type: String, trim: true, default: "" },
     password:    { type: String, required: true, minlength: 6, select: false },
     isActive:    { type: Boolean, default: true },
     lastLogin:   { type: Date },
@@ -25,13 +27,15 @@ userSchema.methods.comparePassword = function (candidate) {
 
 userSchema.methods.toSafeObject = function () {
   return {
-    _id: this._id,
-    fullName: this.fullName,
+    _id:         this._id,
+    fullName:    this.fullName,
+    username:    this.username,
     phoneNumber: this.phoneNumber,
-    email: this.email,
-    isActive: this.isActive,
-    lastLogin: this.lastLogin,
-    createdAt: this.createdAt,
+    email:       this.email,
+    address:     this.address,
+    isActive:    this.isActive,
+    lastLogin:   this.lastLogin,
+    createdAt:   this.createdAt,
   };
 };
 
