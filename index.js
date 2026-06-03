@@ -13,6 +13,8 @@ const cartRoutes     = require("./routes/cart.routes");
 const wishlistRoutes = require("./routes/wishlist.routes");
 const orderRoutes    = require("./routes/order.routes");
 const searchRoutes   = require("./routes/search.routes");
+const referralRoutes = require("./routes/referral.routes");
+
 
 //  Connect Database 
 connectDB();
@@ -42,6 +44,8 @@ app.use("/api/cart",     cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/checkout", orderRoutes);
 app.use("/api/search",   searchRoutes);
+app.use("/api/referral", referralRoutes);
+
 
 //  404 Handler 
 app.use((req, res) => {
