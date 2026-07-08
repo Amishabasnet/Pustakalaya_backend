@@ -21,10 +21,29 @@ const buildQuery = (filters = {}) => {
     if (filters.minPrice) q.price.$gte = Number(filters.minPrice);
     if (filters.maxPrice) q.price.$lte = Number(filters.maxPrice);
   }
+
+  const exprConditions = [];
+  const discountExpr = {
+    $cond: [
+      { $and: [{ $gt: ["$originalPrice", 0] }, { $gt: ["$originalPrice", "$price"] }] },
+      { $multiply: [{ $divide: [{ $subtract: ["$originalPrice", "$price"] }, "$originalPrice"] }, 100] },
+      0,
+    ],
+  };
+
   if (filters.onSale) {
     q.originalPrice = { $exists: true, $ne: null };
-    q.$expr = { $gt: ["$originalPrice", "$price"] };
+    exprConditions.push({ $gt: ["$originalPrice", "$price"] });
   }
+  if (filters.maxDiscount) {
+    exprConditions.push({ $lte: [discountExpr, Number(filters.maxDiscount)] });
+    exprConditions.push({ $gt: [discountExpr, 0] });
+  }
+
+  if (exprConditions.length) {
+    q.$expr = exprConditions.length === 1 ? exprConditions[0] : { $and: exprConditions };
+  }
+
   return q;
 };
 
@@ -52,11 +71,11 @@ class BookService {
     return new BookDetailDTO(book, effectiveDiscount, recentReviews);
   }
 
-  async getBooks({ search, authors, genres, minRating, minPrice, maxPrice, sort = "newest", page = 1, limit = 20 }) {
+  async getBooks({ search, authors, genres, minRating, minPrice, maxPrice, maxDiscount, sort = "newest", page = 1, limit = 20 }) {
     const filters = {
       authors: authors ? authors.split(",") : [],
       genres:  genres  ? genres.split(",")  : [],
-      minRating, minPrice, maxPrice,
+      minRating, minPrice, maxPrice, maxDiscount,
     };
     const query = buildQuery(filters);
     if (search?.trim()) query.$text = { $search: search.trim() };
