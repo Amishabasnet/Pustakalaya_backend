@@ -1,4 +1,4 @@
-const AppError = require("./AppError");
+const AppError = require("./apiError");
 
 const BadRequest    = (msg) => new AppError(msg, 400);
 const Unauthorized  = (msg) => new AppError(msg, 401);
