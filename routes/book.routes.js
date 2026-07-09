@@ -1,7 +1,7 @@
 const router           = require("express").Router();
 const bookCtrl         = require("../controllers/book.controller");
 const reviewCtrl       = require("../controllers/review.controller");
-const { protect, optionalAuth } = require("../middlewares/auth.middleware");
+const { protect, optionalAuth, isAdmin } = require("../middlewares/auth.middleware");
 
 // Public book routes 
 router.get("/home",                bookCtrl.getHomeScreen.bind(bookCtrl));
@@ -11,9 +11,9 @@ router.get("/",                    bookCtrl.getBooks.bind(bookCtrl));
 router.get("/:id",                 bookCtrl.getBook.bind(bookCtrl));
 
 // Admin routes 
-router.post("/",       protect, bookCtrl.createBook.bind(bookCtrl));
-router.put("/:id",    protect, bookCtrl.updateBook.bind(bookCtrl));
-router.delete("/:id", protect, bookCtrl.deleteBook.bind(bookCtrl));
+router.post("/",      protect, isAdmin, bookCtrl.createBook.bind(bookCtrl));
+router.put("/:id",    protect, isAdmin, bookCtrl.updateBook.bind(bookCtrl));
+router.delete("/:id", protect, isAdmin, bookCtrl.deleteBook.bind(bookCtrl));
 
 // Review routes (nested) 
 router.get   ("/:bookId/reviews", reviewCtrl.getReviews.bind(reviewCtrl));

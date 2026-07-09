@@ -38,6 +38,7 @@ class UserResponseDTO {
     this.phoneNumber = user.phoneNumber;
     this.email       = user.email;
     this.address     = user.address;
+    this.role        = user.role;
     this.isActive    = user.isActive;
     this.lastLogin   = user.lastLogin;
     this.createdAt   = user.createdAt;
