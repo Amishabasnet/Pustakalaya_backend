@@ -28,6 +28,13 @@ const protect = async (req, res, next) => {
   }
 };
 
+// Must run after `protect` — requires req.user to be set
+const isAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== "admin")
+    return next(Forbidden("Admin access required."));
+  next();
+};
+
 // Attach user if token present, but don't block if absent
 const optionalAuth = async (req, res, next) => {
   try {
@@ -46,4 +53,4 @@ const optionalAuth = async (req, res, next) => {
   } catch (_) { next(); }
 };
 
-module.exports = { protect, optionalAuth };
+module.exports = { protect, optionalAuth, isAdmin };

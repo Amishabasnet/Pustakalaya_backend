@@ -25,6 +25,21 @@ class SupportController {
       res.status(200).json({ success: true, data });
     } catch (err) { next(err); }
   }
+
+  // Admin
+  async getAllRequests(req, res, next) {
+    try {
+      const data = await supportService.getAllRequests(req.query);
+      res.status(200).json({ success: true, data });
+    } catch (err) { next(err); }
+  }
+
+  async updateRequest(req, res, next) {
+    try {
+      const data = await supportService.updateRequestAdmin(req.params.requestId, req.body);
+      res.status(200).json({ success: true, message: "Support request updated.", data });
+    } catch (err) { next(err); }
+  }
 }
 
 module.exports = new SupportController();

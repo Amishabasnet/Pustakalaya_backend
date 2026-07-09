@@ -40,6 +40,19 @@ class BookRepository {
   getDistinctAuthors() { return Book.distinct("author", { stock: { $gt: 0 } }); }
   getDistinctGenres()  { return Book.distinct("genre",  { stock: { $gt: 0 } }); }
 
+  // ---- Admin: unrestricted (includes unverified/unfeatured/out-of-stock) ----
+  findAllPaginated({ query, skip, limit }) {
+    return Book.find(query, query.$text ? { score: { $meta: "textScore" } } : {})
+      .sort(query.$text ? { score: { $meta: "textScore" } } : { createdAt: -1 })
+      .skip(skip).limit(limit);
+  }
+
+  countAllFiltered(query) { return Book.countDocuments(query); }
+
+  findLowStock(threshold = 5, limit = 10) {
+    return Book.find({ stock: { $lt: threshold } }).sort({ stock: 1 }).limit(limit);
+  }
+
   create(data)               { return Book.create(data); }
   updateById(id, data)       { return Book.findByIdAndUpdate(id, data, { new: true, runValidators: true }); }
   deleteById(id)             { return Book.findByIdAndDelete(id); }

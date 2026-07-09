@@ -15,6 +15,7 @@ const orderRoutes    = require("./routes/order.routes");
 const searchRoutes   = require("./routes/search.routes");
 const referralRoutes = require("./routes/referral.routes");
 const supportRoutes  = require("./routes/support.routes");
+const adminRoutes    = require("./routes/admin.routes");
 
 //  Connect Database 
 connectDB();
@@ -46,6 +47,7 @@ app.use("/api/checkout", orderRoutes);
 app.use("/api/search",   searchRoutes);
 app.use("/api/referral", referralRoutes);
 app.use("/api/support",  supportRoutes);
+app.use("/api/admin",    adminRoutes);
 
 
 //  404 Handler 
