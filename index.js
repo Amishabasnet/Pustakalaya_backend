@@ -16,6 +16,7 @@ const searchRoutes   = require("./routes/search.routes");
 const referralRoutes = require("./routes/referral.routes");
 const supportRoutes  = require("./routes/support.routes");
 const adminRoutes    = require("./routes/admin.routes");
+const reviewsRoutes  = require("./routes/reviews.routes");
 
 //  Connect Database 
 connectDB();
@@ -23,13 +24,12 @@ connectDB();
 const app = express();
 
 //  Core Middleware 
-const corsOptions = {
-  origin: config.nodeEnv === "production" ? config.clientUrl : true,
+app.use(cors({
+  origin: config.clientUrl,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
-};
-app.use(cors(corsOptions));
+}));
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -49,6 +49,7 @@ app.use("/api/search",   searchRoutes);
 app.use("/api/referral", referralRoutes);
 app.use("/api/support",  supportRoutes);
 app.use("/api/admin",    adminRoutes);
+app.use("/api/reviews",  reviewsRoutes);
 
 
 //  404 Handler 

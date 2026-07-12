@@ -1,6 +1,7 @@
 const userRepo                          = require("../repositories/user.repository");
 const orderRepo                         = require("../repositories/order.repository");
 const wishlistRepo                      = require("../repositories/wishlist.repository");
+const reviewRepo                        = require("../repositories/review.repository");
 const { sendTokenResponse }             = require("../config/jwt");
 const { Conflict, Unauthorized, Forbidden, BadRequest } = require("../errors/httpErrors");
 
@@ -77,13 +78,15 @@ class AuthService {
   }
 
   async getProfileStats(userId) {
-    const [ordersCount, wishlist] = await Promise.all([
+    const [ordersCount, wishlist, reviewsCount] = await Promise.all([
       orderRepo.countByUser(userId),
       wishlistRepo.findByUser(userId),
+      reviewRepo.countByUser(userId),
     ]);
     return {
       ordersPlaced:    ordersCount,
       booksWishlisted: wishlist ? wishlist.books.length : 0,
+      reviewsWritten:  reviewsCount,
     };
   }
 }

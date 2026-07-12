@@ -31,6 +31,14 @@ class ReviewRepository {
       .limit(limit);
   }
 
+  findByUser(userId) {
+    return Review.find({ user: userId })
+      .populate("book", "title author price coverImage rating totalReviews genre isVerified stock")
+      .sort({ createdAt: -1 });
+  }
+
+  countByUser(userId) { return Review.countDocuments({ user: userId }); }
+
   create(data)   { return Review.create(data); }
 }
 

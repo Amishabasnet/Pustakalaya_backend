@@ -1,9 +1,15 @@
 const reviewRepo           = require("../repositories/review.repository");
 const bookRepo             = require("../repositories/book.repository");
 const { NotFound, Conflict, BadRequest } = require("../errors/httpErrors");
-const { ReviewSummaryDTO } = require("../dtos/book.dto");
+const { ReviewSummaryDTO, MyReviewDTO } = require("../dtos/book.dto");
 
 class ReviewService {
+  async getMyReviews(userId) {
+    const reviews = await reviewRepo.findByUser(userId);
+    // A book may have been deleted since the review was written — skip those.
+    return reviews.filter((r) => r.book).map((r) => new MyReviewDTO(r));
+  }
+
   async getReviews(bookId, { page = 1, limit = 10 }) {
     const skip = (Number(page) - 1) * Number(limit);
     const [reviews, total, breakdown] = await Promise.all([
