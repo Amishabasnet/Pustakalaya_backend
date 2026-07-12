@@ -52,12 +52,11 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-orderSchema.pre("save", async function (next) {
+orderSchema.pre("save", async function () {
   if (!this.orderId) {
     const count = await this.constructor.countDocuments();
     this.orderId = `FS-${10000 + count + 1}`;
   }
-  next();
 });
 
 module.exports = mongoose.model("Order", orderSchema);
