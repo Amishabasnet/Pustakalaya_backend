@@ -48,6 +48,18 @@ class ReviewSummaryDTO {
   }
 }
 
+class MyReviewDTO {
+  constructor(review) {
+    this._id       = review._id;
+    this.rating    = review.rating;
+    this.comment   = review.comment;
+    this.createdAt = review.createdAt;
+    this.book      = review.book
+      ? new BookListItemDTO(review.book)
+      : null;
+  }
+}
+
 class HomeScreenDTO {
   constructor(featured, recentlyAdded) {
     this.featured      = featured.map((b) => new BookListItemDTO(b));
@@ -55,4 +67,4 @@ class HomeScreenDTO {
   }
 }
 
-module.exports = { BookListItemDTO, BookDetailDTO, ReviewSummaryDTO, HomeScreenDTO };
+module.exports = { BookListItemDTO, BookDetailDTO, ReviewSummaryDTO, MyReviewDTO, HomeScreenDTO };

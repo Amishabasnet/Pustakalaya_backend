@@ -1,30 +1,24 @@
-const router       = require("express").Router();
-const adminCtrl    = require("../controllers/admin.controller");
-const supportCtrl  = require("../controllers/support.controller");
-const { protect, isAdmin } = require("../middlewares/auth.middleware");
-const { updateOrderStatusValidator, updateSupportRequestValidator } = require("../validators/admin.validator");
+// Admin User DTO
+class AdminUserDTO {
+  constructor(user) {
+    this._id = user._id;
+    this.fullName = user.fullName;
+    this.email = user.email;
+    this.phoneNumber = user.phoneNumber;
+    this.status = user.status;
+    this.createdAt = user.createdAt;
+  }
+}
 
-router.use(protect, isAdmin);
+// Paginated DTO
+class PaginatedDTO {
+  constructor(data, total, page, limit) {
+    this.data = data;
+    this.total = total;
+    this.page = page;
+    this.limit = limit;
+    this.totalPages = Math.ceil(total / limit);
+  }
+}
 
-// Dashboard 
-router.get("/dashboard", adminCtrl.getDashboard.bind(adminCtrl));
-
-// Users 
-router.get  ("/users",             adminCtrl.getUsers.bind(adminCtrl));
-router.get  ("/users/:id",         adminCtrl.getUserDetail.bind(adminCtrl));
-router.patch("/users/:id/status",  adminCtrl.toggleUserStatus.bind(adminCtrl));
-
-// Orders 
-router.get  ("/orders",                                        adminCtrl.getOrders.bind(adminCtrl));
-router.patch("/orders/:orderId/status", updateOrderStatusValidator, adminCtrl.updateOrderStatus.bind(adminCtrl));
-
-// Books 
-router.get  ("/books",              adminCtrl.getBooks.bind(adminCtrl));
-router.patch("/books/:id/verify",   adminCtrl.toggleBookVerify.bind(adminCtrl));
-router.patch("/books/:id/feature",  adminCtrl.toggleBookFeature.bind(adminCtrl));
-
-// Support 
-router.get  ("/support",             supportCtrl.getAllRequests.bind(supportCtrl));
-router.patch("/support/:requestId", updateSupportRequestValidator, supportCtrl.updateRequest.bind(supportCtrl));
-
-module.exports = router;
+module.exports = { AdminUserDTO, PaginatedDTO };

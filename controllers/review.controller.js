@@ -1,6 +1,13 @@
 const reviewService = require("../services/review.service");
 
 class ReviewController {
+  async getMyReviews(req, res, next) {
+    try {
+      const reviews = await reviewService.getMyReviews(req.user._id);
+      res.status(200).json({ success: true, data: { reviews } });
+    } catch (err) { next(err); }
+  }
+
   async getReviews(req, res, next) {
     try {
       const data = await reviewService.getReviews(req.params.bookId, req.query);
