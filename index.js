@@ -1,4 +1,5 @@
 const express      = require("express");
+const path         = require("path");
 const cors         = require("cors");
 const cookieParser = require("cookie-parser");
 
@@ -17,6 +18,7 @@ const referralRoutes = require("./routes/referral.routes");
 const supportRoutes  = require("./routes/support.routes");
 const adminRoutes    = require("./routes/admin.routes");
 const reviewsRoutes  = require("./routes/reviews.routes");
+const uploadRoutes   = require("./routes/upload.routes");
 
 //  Connect Database 
 connectDB();
@@ -25,18 +27,7 @@ const app = express();
 
 //  Core Middleware 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-
-    const isLocalDevOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-    const isConfiguredOrigin = origin === config.clientUrl;
-
-    if (isConfiguredOrigin || (config.nodeEnv === "development" && isLocalDevOrigin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error("Not allowed by CORS"));
-  },
+  origin: config.clientUrl,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -44,6 +35,7 @@ app.use(cors({
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 //  Health Check 
 app.get("/", (req, res) => {
@@ -61,6 +53,7 @@ app.use("/api/referral", referralRoutes);
 app.use("/api/support",  supportRoutes);
 app.use("/api/admin",    adminRoutes);
 app.use("/api/reviews",  reviewsRoutes);
+app.use("/api/upload",   uploadRoutes);
 
 
 //  404 Handler 

@@ -142,8 +142,12 @@ class BookService {
     };
   }
 
-  async createBook(data)        { return bookRepo.create(data); }
+  async createBook(data)        {
+    if (!data.isbn) delete data.isbn;
+    return bookRepo.create(data);
+  }
   async updateBook(id, data)    {
+    if (!data.isbn) delete data.isbn;
     const book = await bookRepo.updateById(id, data);
     if (!book) throw NotFound("Book not found.");
     return book;
