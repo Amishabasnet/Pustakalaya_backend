@@ -2,7 +2,11 @@ const bookRepo                      = require("../repositories/book.repository")
 const userRepo                      = require("../repositories/user.repository");
 const orderRepo                     = require("../repositories/order.repository");
 const supportRepo                   = require("../repositories/support.repository");
-const { NotFound, BadRequest }      = require("../errors/httpErrors");
+const Cart                          = require("../models/Cart");
+const Wishlist                      = require("../models/Wishlist");
+const SearchHistory                 = require("../models/SearchHistory");
+const Review                        = require("../models/Review");
+const { NotFound, BadRequest, Forbidden, Conflict } = require("../errors/httpErrors");
 const { ORDER_STATUS, PAYMENT_STATUS } = require("../types/constants");
 const { AdminUserDTO, PaginatedDTO }   = require("../dtos/admin.dto");
 
@@ -91,6 +95,32 @@ class AdminService {
     user.isActive = !user.isActive;
     await user.save({ validateBeforeSave: false });
     return new AdminUserDTO(user);
+  }
+
+  async deleteUser(id, requestingAdminId) {
+    const user = await userRepo.findById(id);
+    if (!user) throw NotFound("User not found.");
+
+    if (user.role === "admin") throw Forbidden("Admin accounts cannot be deleted.");
+    if (String(user._id) === String(requestingAdminId)) {
+      throw BadRequest("You cannot delete your own account.");
+    }
+
+    const orderCount = await orderRepo.countByUser(id);
+    if (orderCount > 0) {
+      throw Conflict(
+        "This user has order history and cannot be deleted. Deactivate the account instead."
+      );
+    }
+
+    await Promise.all([
+      Cart.deleteOne({ user: id }),
+      Wishlist.deleteOne({ user: id }),
+      SearchHistory.deleteOne({ user: id }),
+      Review.deleteMany({ user: id }),
+    ]);
+
+    await userRepo.deleteById(id);
   }
 
   // Orders

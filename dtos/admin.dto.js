@@ -5,7 +5,7 @@ class AdminUserDTO {
     this.fullName = user.fullName;
     this.email = user.email;
     this.phoneNumber = user.phoneNumber;
-    this.status = user.status;
+    this.isActive = user.isActive;
     this.createdAt = user.createdAt;
   }
 }

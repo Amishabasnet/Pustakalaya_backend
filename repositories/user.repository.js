@@ -8,6 +8,7 @@ class UserRepository {
   findByUsername(username)   { return User.findOne({ username }); }
   create(data)               { return User.create(data); }
   updateById(id, data)       { return User.findByIdAndUpdate(id, data, { new: true }); }
+  deleteById(id) { return User.findByIdAndDelete(id); }
 
   // Admin
   findAllPaginated({ query, skip, limit }) {

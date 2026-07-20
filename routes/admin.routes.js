@@ -13,6 +13,7 @@ router.get("/dashboard", adminCtrl.getDashboard.bind(adminCtrl));
 router.get  ("/users",             adminCtrl.getUsers.bind(adminCtrl));
 router.get  ("/users/:id",         adminCtrl.getUserDetail.bind(adminCtrl));
 router.patch("/users/:id/status",  adminCtrl.toggleUserStatus.bind(adminCtrl));
+router.delete("/users/:id",        adminCtrl.deleteUser.bind(adminCtrl));
 
 // Orders 
 router.get  ("/orders",                                        adminCtrl.getOrders.bind(adminCtrl));
