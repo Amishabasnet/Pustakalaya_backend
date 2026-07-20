@@ -1,4 +1,5 @@
 const express      = require("express");
+const path         = require("path");
 const cors         = require("cors");
 const cookieParser = require("cookie-parser");
 
@@ -17,6 +18,7 @@ const referralRoutes = require("./routes/referral.routes");
 const supportRoutes  = require("./routes/support.routes");
 const adminRoutes    = require("./routes/admin.routes");
 const reviewsRoutes  = require("./routes/reviews.routes");
+const uploadRoutes   = require("./routes/upload.routes");
 
 //  Connect Database 
 connectDB();
@@ -24,18 +26,35 @@ connectDB();
 const app = express();
 
 //  Core Middleware 
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return process.env.NODE_ENV === "development";
+  }
+
+  if (process.env.NODE_ENV === "development" && /^(http:\/\/localhost|http:\/\/127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    return true;
+  }
+
+  if (origin === config.clientUrl) {
+    return true;
+  }
+
+  if (config.clientUrl && config.clientUrl.includes("*")) {
+    const escaped = config.clientUrl.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+    const pattern = escaped.replace(/\\\*/g, ".*");
+    return new RegExp(`^${pattern}$`).test(origin);
+  }
+
+  return false;
+};
+
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-
-    const isLocalDevOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-    const isConfiguredOrigin = origin === config.clientUrl;
-
-    if (isConfiguredOrigin || (config.nodeEnv === "development" && isLocalDevOrigin)) {
-      return callback(null, true);
+    if (isAllowedOrigin(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
     }
-
-    return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
@@ -44,6 +63,7 @@ app.use(cors({
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 //  Health Check 
 app.get("/", (req, res) => {
@@ -61,6 +81,7 @@ app.use("/api/referral", referralRoutes);
 app.use("/api/support",  supportRoutes);
 app.use("/api/admin",    adminRoutes);
 app.use("/api/reviews",  reviewsRoutes);
+app.use("/api/upload",   uploadRoutes);
 
 
 //  404 Handler 

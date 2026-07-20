@@ -13,7 +13,7 @@ class AdminUserDTO {
 // Paginated DTO
 class PaginatedDTO {
   constructor(data, total, page, limit) {
-    this.data = data;
+    this.items = data;
     this.total = total;
     this.page = page;
     this.limit = limit;
