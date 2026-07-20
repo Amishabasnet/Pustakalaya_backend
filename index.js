@@ -26,8 +26,36 @@ connectDB();
 const app = express();
 
 //  Core Middleware 
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return process.env.NODE_ENV === "development";
+  }
+
+  if (process.env.NODE_ENV === "development" && /^(http:\/\/localhost|http:\/\/127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    return true;
+  }
+
+  if (origin === config.clientUrl) {
+    return true;
+  }
+
+  if (config.clientUrl && config.clientUrl.includes("*")) {
+    const escaped = config.clientUrl.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+    const pattern = escaped.replace(/\\\*/g, ".*");
+    return new RegExp(`^${pattern}$`).test(origin);
+  }
+
+  return false;
+};
+
 app.use(cors({
-  origin: config.clientUrl,
+  origin: (origin, callback) => {
+    if (isAllowedOrigin(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
